@@ -1,0 +1,47 @@
+{
+    "name": "odandb/xhprof-bundle",
+    "description": "This bundle add additional XHProf menu item in symfony debug toolbar & makes things easier to handle XHProf profiling",
+    "type": "symfony-bundle",
+    "keywords": [
+        "symfony",
+        "xhprof",
+        "profiling",
+        "debug",
+        "tideways",
+        "xhgui"
+    ],
+    "require": {
+        "php": ">=7.4",
+        "perftools/php-profiler": "^1.1",
+        "symfony/config": "^5.4 || ^6.0",
+        "symfony/dependency-injection": "^5.4 || ^6.0",
+        "symfony/framework-bundle": "^5.4 || ^6.0",
+        "symfony/http-kernel": "^5.4 || ^6.0"
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^6.2"
+    },
+    "suggest": {
+        "perftools/xhgui": "To view the profiling results in a web interface"
+    },
+    "license": "MIT",
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Odandb\\XhprofBundle\\": "src/",
+            "Odandb\\XhprofBundle\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mathieu Girard",
+            "email": "mathieu.girard@odandb.com"
+        },
+        {
+            "name": "OD&B",
+            "homepage": "https://www.odandb.com/"
+        }
+    ]
+}

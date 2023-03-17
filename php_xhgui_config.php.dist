@@ -1,0 +1,25 @@
+<?php
+
+// Configuration for the profiler to send data to XHGui.
+// Set the callable of "profiler.enable" to return false in order to disable the profiler.
+return [
+    'profiler.enable' => function() {
+        return mb_strtolower($_ENV['XHGUI_PROFILER_ENABLE'] ?? 'false') === 'true';
+    },
+
+    'save.handler' => 'upload',
+    // Saving profile data by upload is only recommended with HTTPS
+    // endpoints that have IP whitelists applied.
+    'save.handler.upload' => array(
+        'url' => $_ENV['XHGUI_PROFILER_IMPORT_URL'] ?? '',
+        // The timeout option is in seconds and defaults to 3 if unspecified.
+        'timeout' => 3,
+        // the token must match 'upload.token' config in XHGui
+        'token' => $_ENV['XHGUI_UPLOAD_TOKEN'] ?? '',
+    ),
+    'profiler.simple_url' => null,
+    'profiler.options' => [],
+    'date.format' => 'M jS H:i:s',
+    'detail.count' => 6,
+    'page.limit' => 25,
+];

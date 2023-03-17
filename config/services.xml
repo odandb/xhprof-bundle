@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="env(XHGUI_PROFILER_CONFIG_PATH)">%kernel.project_dir%/php_xhgui_config.php</parameter>
+        <parameter key="php_xhgui_config_path">%env(XHGUI_PROFILER_CONFIG_PATH)%</parameter>
+    </parameters>
+
+    <services>
+        <!-- first, create a service for the factory -->
+        <service id="Odandb\XhprofBundle\Service\ConfigFactory">
+            <argument>%php_xhgui_config_path%</argument>
+        </service>
+
+        <!-- second, use the factory service as the first argument of the 'factory'
+             option and the factory method as the second argument -->
+        <service id="Xhgui\Profiler\Config">
+            <factory service="Odandb\XhprofBundle\Service\ConfigFactory"
+                     method="create"
+            />
+        </service>
+
+        <service id="Odandb\XhprofBundle\EventSubscriber\KernelEventSubscriber" public="true">
+            <argument type="service" id="Xhgui\Profiler\Config" />
+            <tag name="kernel.event_subscriber" />
+        </service>
+
+        <service id="Odandb\XhprofBundle\DataCollector\XhprofCollector">
+            <!-- the 'template' attribute has more priority than the value returned by getTemplate() -->
+            <tag name="data_collector"
+                 id="odb.xhprof"
+                 template="@OdandbXhprof/data_collector/template.html.twig"
+            />
+            <argument type="service" id="Xhgui\Profiler\Config" />
+            <!-- optional 'priority' attribute (positive or negative integer; default = 0) -->
+            <!-- priority="300" -->
+        </service>
+    </services>
+</container>
