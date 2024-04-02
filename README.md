@@ -142,16 +142,15 @@ Add the following configuration to your Dockerfile file for **php**.
 # Dockerfile
 # ...
 ##-- ONLY FOR XHPROF --##
-RUN git clone "https://github.com/tideways/php-xhprof-extension.git" xhprof-ext \
-    && cd xhprof-ext \
-    && apk add --update --no-cache build-base autoconf \
+RUN git clone "https://github.com/longxinH/xhprof.git" xhprof-ext \
+    && cd xhprof-ext/extension \
     && phpize \
     && ./configure \
     && make \
     && make install \
-    && cd .. \
+    && cd ../.. \
     && rm -rf xhprof-ext \
-    && docker-php-ext-enable tideways_xhprof
+    && docker-php-ext-enable xhprof
 ##-- ONLY FOR XHPROF --##
 ```
 
