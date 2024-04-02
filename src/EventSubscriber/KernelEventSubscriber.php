@@ -14,9 +14,9 @@ use Xhgui\Profiler\Profiler;
 class KernelEventSubscriber implements EventSubscriberInterface
 {
     private ?Profiler $profiler = null;
-    private ?Config $config = null;
+    private ?Config $config;
 
-    public function __construct(?Config $config)
+    public function __construct(?Config $config = null)
     {
         $this->config = $config;
     }

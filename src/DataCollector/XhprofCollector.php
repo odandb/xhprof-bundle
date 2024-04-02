@@ -13,9 +13,9 @@ use Xhgui\Profiler\Config;
 
 class XhprofCollector extends AbstractDataCollector
 {
-    private ?Config $config = null;
+    private ?Config $config;
 
-    public function __construct(?Config $config)
+    public function __construct(?Config $config = null)
     {
         $this->config = $config;
     }
@@ -28,7 +28,7 @@ class XhprofCollector extends AbstractDataCollector
     public function collect(Request $request, Response $response, \Throwable $exception = null)
     {
         $configArr = $this->config->toArray();
-        $data = $request->attributes->get('_xhprof_data', [])['profile'] ?? [];
+        $data = $request->attributes->all('_xhprof_data')['profile'] ?? [];
 
         uasort($data, function(array $a, array $b) {
             return $b['wt'] - $a['wt'];
@@ -48,32 +48,27 @@ class XhprofCollector extends AbstractDataCollector
         ];
     }
 
-    public function getIsEnabled()
+    public function getIsEnabled(): bool
     {
         return $this->data['isEnabled'];
     }
 
-    public function getExtensionLoaded()
+    public function getExtensionLoaded(): array
     {
         return $this->data['extensionLoaded'];
     }
 
-    public function getSaverMethod()
+    public function getSaverMethod(): string
     {
         return $this->data['saver'];
     }
 
-    public function getUploadMethod()
+    public function getUploadMethod(): array
     {
         return $this->data['upload'];
     }
 
-    public function getAcceptableContentTypes()
-    {
-        return $this->data['acceptable_content_types'];
-    }
-
-    public function getProfileData()
+    public function getProfileData(): array
     {
         $stats = $this->data['stats'];
 
@@ -81,7 +76,7 @@ class XhprofCollector extends AbstractDataCollector
             $tmp = explode('==>', $execution);
 
             $data['parent'] = $tmp[0];
-            $data['child']  = isset($tmp[1]) ? $tmp[1] : '';
+            $data['child']  = $tmp[1] ?? '';
 
             $data['parent_trimmed'] = $this->trimString($data['parent']);
             $data['child_trimmed']  = $this->trimString($data['child']);
@@ -100,7 +95,7 @@ class XhprofCollector extends AbstractDataCollector
         return $stats;
     }
 
-    public function trimString(string $value)
+    public function trimString(string $value): string
     {
         if (strlen($value) <= 50) {
             return $value;
