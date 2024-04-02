@@ -27,6 +27,10 @@ class XhprofCollector extends AbstractDataCollector
 
     public function collect(Request $request, Response $response, \Throwable $exception = null)
     {
+        if (null === $this->config) {
+            throw new \RuntimeException('Config file is not defined: run "cp vendor/odandb/xhprof-bundle/php_xhgui_config.php.dist php_xhgui_config.php" to create a config file.');
+        }
+
         $configArr = $this->config->toArray();
         $data = $request->attributes->get('_xhprof_data', [])['profile'] ?? [];
 
