@@ -19,18 +19,14 @@ class FunctionalTest extends WebTestCase
 {
     protected ?KernelBrowser $client;
 
-    protected ?ContainerInterface $container;
-
     protected function setUp() : void
     {
         $this->client = self::createClient();
-
-        $this->container = $this->client->getContainer();
     }
 
     public function testServiceWiring()
     {
-        $service = $this->container->get(KernelEventSubscriber::class);
+        $service = self::getContainer()->get(KernelEventSubscriber::class);
         self::assertInstanceOf(KernelEventSubscriber::class, $service);
     }
 

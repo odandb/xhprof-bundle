@@ -87,7 +87,12 @@ jobs:
                     SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
             -   name: Run tests
-                run: composer test
+                run: | 
+                    if [[ "${{ matrix.coverage }}" == 'pcov' ]]; then
+                        composer test-coverage
+                    else
+                        composer test
+                    fi
 
             -   name: Monitor coverage
                 if: matrix.coverage != 'none'
