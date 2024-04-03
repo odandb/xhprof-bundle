@@ -1,0 +1,3 @@
+person_list:
+    path: /profile
+    controller: Odandb\XhprofBundle\Tests\Fixtures\Controller\TestController::profile
