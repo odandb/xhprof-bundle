@@ -1,43 +1,99 @@
-name: ci
+name: PHPUnit
 
 on:
-  pull_request:
-    branches: [ master ]
+    push:
+    pull_request:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
 
 jobs:
-  build:
 
-    runs-on: ubuntu-latest
+    test:
+        name: "PHP ${{ matrix.php }} - Symfony ${{ matrix.symfony }}"
+        runs-on: ubuntu-latest
+        continue-on-error: ${{ matrix.can-fail }}
 
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: [ '7.4', '8.0', '8.1', '8.2' ]
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    # Lowest Deps 5.4
+                    -   php: lowest
+                        symfony: 5.4.*
+                        coverage: 'none'
+                        composer-flags: '--prefer-stable --prefer-lowest'
+                        can-fail: false
+                    # LTS with latest stable PHP 5.4
+                    -   php: latest
+                        symfony: 5.4.*
+                        coverage: 'none'
+                        composer-flags: '--prefer-stable'
+                        can-fail: false
+                    # LTS with latest stable PHP 6.4
+                    -   php: latest
+                        symfony: 6.4.*
+                        coverage: 'none'
+                        composer-flags: '--prefer-stable'
+                        can-fail: false
+                    # Active release
+                    -   php: latest
+                        symfony: 7.0.*
+                        coverage: pcov
+                        composer-flags: '--prefer-stable'
+                        can-fail: false
+                    # Development release
+                    -   php: nightly
+                        symfony: 7.1.*@dev
+                        coverage: 'none'
+                        composer-flags: ''
+                        can-fail: true
 
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
+                with:
+                    fetch-depth: 2
 
-      - name: php-setup
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-version }}
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    tools: composer:v2, flex
+                    coverage: ${{ matrix.coverage }}
+                    ini-values: date.timezone=UTC,memory_limit=-1,session.gc_probability=0,apc.enable_cli=1,zend.assertions=1
+                env:
+                    fail-fast: true
 
-      - name: composer-validate
-        run: composer validate
+            -   name: Set Composer stability
+                if: matrix.php == 'nightly'
+                run: "composer config minimum-stability dev"
 
-      - name: composer-cache
-        id: composer-cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.php-version }}-composer-
+            -   name: Get composer cache directory
+                id: composer-cache
+                run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: composer-install
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer install --prefer-dist --no-progress --no-suggest
+            -   name: Cache composer dependencies
+                uses: actions/cache@v4
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-${{ hashFiles('**/composer.json') }}
+                    restore-keys: php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-composer-
 
-      - name: phpunit
-        run: vendor/bin/phpunit
+            -   name: Install Composer dependencies
+                run: composer update ${{ matrix.composer-flags }} --no-interaction --no-progress --optimize-autoloader
+                env:
+                    SYMFONY_REQUIRE: ${{ matrix.symfony }}
+
+            -   name: Run tests
+                run: composer test
+
+            -   name: Monitor coverage
+                if: matrix.coverage != 'none'
+                uses: slavcodev/coverage-monitor-action@v1
+                with:
+                    github_token: ${{ secrets.GITHUB_TOKEN }}
+                    coverage_path: coverage-report.xml
+                    threshold_alert: 60
+                    threshold_warning: 80

@@ -1,7 +1,5 @@
-/.idea/
-/var/
 /vendor/
-.DS_Store
+.php_cs.cache
 .phpunit.result.cache
 composer.lock
-phpunit.xml
+coverage-report.xml
