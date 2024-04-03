@@ -15,7 +15,11 @@
     </php>
 
     <testsuites>
-        <testsuite name="XhprofBundle test suite">
+        <testsuite name="XhprofBundle unit test suite">
+            <directory>tests/Unit</directory>
+        </testsuite>
+
+        <testsuite name="XhprofBundle functional test suite">
             <directory>tests/Functional</directory>
         </testsuite>
     </testsuites>
